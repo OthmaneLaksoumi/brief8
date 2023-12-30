@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 try {
 	$conn = new PDO('mysql:host=localhost;dbname=brief8', 'root', '');
 	$stmt = $conn->prepare("SELECT * FROM products WHERE isHide = 0");

@@ -219,11 +219,11 @@ if (isset($_SESSION['client'])) {
 												</div>
 												<div class="product-body">
 													<h3 class="product-name"><a href="#">
-															<?php //echo $product->getEtiquette(); 
+															<?php echo $product->getEtiquette(); 
 															?>
 														</a></h3>
 													<h4 class="product-price">
-														<?php echo "$" . number_format($product->getPrixOffre(), 2); ?>
+														<?php echo number_format($product->getPrixOffre(), 2) . "DH "; ?><del class="product-old-price"><?php echo number_format($product->getPrixFinal(), 2) . "DH"; ?></del>
 													</h4>
 													<div class="product-rating">
 														<i class="fa fa-star"></i>

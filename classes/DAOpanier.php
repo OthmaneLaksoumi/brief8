@@ -12,9 +12,17 @@ class DAOpanier
         $this->db = $conn->getConn();
     }
 
-    public function get_panier()
+    public function get_panier($client_username = 0, $product_ref = 0)
     {
-        $query = "SELECT * FROM panier";
+        if ($client_username == 0) {
+            $query = "SELECT * FROM panier";
+        } else {
+            if ($product_ref == 0) {
+                $query = "SELECT * FROM panier WHERE client_username = '$client_username'";
+            } else {
+                $query = "SELECT * FROM panier WHERE client_username = '$client_username' AND product_ref = '$product_ref'";
+            }
+        }
         $stmt = $this->db->prepare($query);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -24,4 +32,23 @@ class DAOpanier
         }
         return $panier;
     }
+
+    public function insert_panier($panier) {
+        $query = 'INSERT INTO panier VALUES (?, ?, ?)';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$panier->getClient_username(), $panier->getProduct_ref(), $panier->getQnt()]);
+    }
+
+    public function update_panier($panier) {
+        $query = 'UPDATE panier SET qnt = ? WHERE product_ref = ? AND client_username = ?';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$panier->getQnt(), $panier->getProduct_ref(), $panier->getClient_username()]);
+    }
+
+    public function delete_panier($panier) {
+        $query = 'DELETE FROM panier WHERE client_username = ? AND product_ref = ?';
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([$panier->getClient_username(), $panier->getProduct_ref()]);
+    }
+
 }

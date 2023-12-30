@@ -5,7 +5,7 @@ class panier {
     private $product_ref;
     private $qnt;
 
-    public function __construct($client_username, $product_ref, $qnt) {
+    public function __construct($client_username, $product_ref, $qnt = 1) {
         $this->client_username = $client_username;
         $this->product_ref = $product_ref;
         $this->qnt = $qnt;

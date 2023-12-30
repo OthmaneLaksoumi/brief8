@@ -1,5 +1,4 @@
 <?php
-// include("connection.php");
 session_start();
 require_once("classes/DAOclient.php");
 

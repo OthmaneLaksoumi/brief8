@@ -26,6 +26,10 @@ class DAOcategorie
         return $categories_objects;
     }
 
+    public function get_all_categories() {
+        return array_merge($this->get_categorie(0), $this->get_categorie(1));
+    }
+
     public function insert_categorie($categorie)
     {
         if (!in_array($categorie, array_merge($this->get_categorie(0), $this->get_categorie(1)))) {

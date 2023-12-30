@@ -1,7 +1,6 @@
 <?php
 session_start();
-// $conn = new PDO('mysql:host=localhost;dbname=brief8', 'root', '');
-// include("connection.php");
+
 require_once("classes/DAOpanier.php");
 require_once("classes/DAOproduct.php");
 
@@ -323,6 +322,7 @@ if (isset($_SESSION['client'])) {
 				}
 			}
 			myRequest.send();
+			location.reload();
 		}
 	</script>
 

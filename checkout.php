@@ -1,15 +1,21 @@
 <?php
-include("connection.php");
-$stmt = $conn->prepare("SELECT * FROM categories WHERE isHide = 0");
-$stmt->execute();
-$catgs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+session_start();
+require("classes/DAOcategories.php");
+require("classes/DAOpanier.php");
+require("classes/DAOproduct.php");
+
+$DAOproduct = new DAOproduct();
+$DAOcategorie = new DAOcategorie();
+$DAOpanier = new DAOpanier();
+
+$catgs = $DAOcategorie->get_categorie();
 if (isset($_SESSION['client'])) {
 	$client = $_SESSION['client'];
-	$stmt1 = $conn->prepare("SELECT * FROM panier WHERE client_username = '$client'");
-	$stmt1->execute();
+	// $stmt1 = $conn->prepare("SELECT * FROM panier WHERE client_username = '$client'");
+	// $stmt1->execute();
 	$nbrOfPanier = $stmt1->rowCount();
-	$panier = $stmt1->fetchAll();
-
+	// $panier = $stmt1->fetchAll();
+	$panier = $DAOpanier->get_panier($client);
 	$subTotal = 0;
 
 	// $stmt2 = $conn->prepare("SELECT * FROM products WHERE ");
@@ -131,7 +137,7 @@ if (isset($_SESSION['client'])) {
 					<ul class="main-nav nav navbar-nav">
 						<li><a class="li-padding" href="product.php">All Products</a></li>
 						<?php foreach ($catgs as $catg) { ?>
-							<li><a class="li-padding" href="product.php"><?php echo $catg['name'] ?></a></li>
+							<li><a class="li-padding" href="product.php"><?php echo $catg->getName() ?></a></li>
 						<?php } ?>
 
 					</ul>
@@ -214,15 +220,16 @@ if (isset($_SESSION['client'])) {
 								<?php foreach ($panier as $item) : ?>
 									<div class="order-col">
 										<?php
-										$ref = $item['product_ref'];
-										$qnt = $item['qnt'];
-										$stmt1 = $conn->prepare("SELECT * FROM products WHERE reference = '$ref'");
-										$stmt1->execute();
-										$product = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+										$ref = $item->getProduct_ref();
+										$qnt = $item->getQnt();
+										// $stmt1 = $conn->prepare("SELECT * FROM products WHERE reference = '$ref'");
+										// $stmt1->execute();
+										
+										$product = $DAOproduct->get_product_by_reference($ref);
 										?>
-										<div><?php echo $qnt . "x " . $product[0]['etiquette']; ?></div>
-										<div><?php echo number_format($product[0]['prixOffre'] * $qnt, 2) . "DH";
-										$subTotal += $product[0]['prixOffre'] * $qnt; ?></div>
+										<div><?php echo $qnt . "x " . $product->getEtiquette(); ?></div>
+										<div><?php echo number_format($product->getPrixOffre() * $qnt, 2) . "DH";
+										$subTotal += $product->getPrixOffre() * $qnt; ?></div>
 									</div>
 								<?php endforeach; ?>
 

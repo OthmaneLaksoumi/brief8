@@ -1,37 +1,32 @@
 <?php
-include("connection.php");
+session_start();
+require("classes/DAOcategories.php");
+require("classes/DAOpanier.php");
+require("classes/DAOproduct.php");
+
+$DAOproduct = new DAOproduct();
+$DAOcategorie = new DAOcategorie();
+$DAOpanier = new DAOpanier();
+
 $ref = $_GET['ref'];
-$stmt = $conn->prepare("SELECT * FROM products WHERE isHide = 0 AND reference = '$ref'");
-$stmt->execute();
-$product = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$reference = (int)$product[0]['reference'];
+$product = $DAOproduct->get_product_by_reference($ref);
 
-$stmt1 = $conn->prepare("SELECT catg FROM products WHERE reference = '$ref'");
-$stmt1->execute();
-$catg = $stmt1->fetchAll(PDO::FETCH_ASSOC)[0]['catg'];
+$reference = (int)$product->getReference();
 
-$stmt2 = $conn->prepare("SELECT * FROM products WHERE isHide = 0 AND catg = '$catg'");
-$stmt2->execute();
-$products = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-$stmt3 = $conn->prepare("SELECT * FROM categories");
-$stmt3->execute();
-$categories = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+$catg = $product->getCatg();
+$products = $DAOproduct->get_product_by_catg($catg);
+$categories = $DAOcategorie->get_all_categories();
 
 if (isset($_SESSION['client'])) {
 	$client = $_SESSION['client'];
-	$stmt1 = $conn->prepare("SELECT * FROM panier WHERE client_username = '$client'");
-	$stmt1->execute();
-	$nbrOfPanier = $stmt1->rowCount();
+	$nbrOfPanier = count($DAOpanier->get_panier($client));
 
-	$stmt2 = $conn->prepare("SELECT qnt FROM panier WHERE client_username = '$client' AND product_ref = '$ref'");
-	$stmt2->execute();
-	$qnt = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-	if (empty($qnt)) {
+	// $qnt = $DAOpanier->get_panier($client, $ref)[0]->getQnt();
+	if (empty($DAOpanier->get_panier($client, $ref))) {
 		$result = 1;
 	} else {
-		$result = $qnt[0]['qnt'];
+		$result = $DAOpanier->get_panier($client, $ref)[0]->getQnt();
 	}
 }
 
@@ -49,7 +44,7 @@ if (isset($_SESSION['client'])) {
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-	<title><?php echo $product[0]['etiquette'] ?></title>
+	<title><?php echo $product->getEtiquette()?></title>
 
 	<!-- Google font -->
 	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
@@ -70,12 +65,6 @@ if (isset($_SESSION['client'])) {
 	<!-- Custom stlylesheet -->
 	<link type="text/css" rel="stylesheet" href="css/style.css" />
 
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-		  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-		<![endif]-->
 
 </head>
 
@@ -165,7 +154,7 @@ if (isset($_SESSION['client'])) {
 				<ul class="main-nav nav navbar-nav">
 					<li><a href="productPage.php">All Products</a></li>
 					<?php foreach ($categories as $category) : ?>
-						<li><a href="product.php?catg=<?php echo $category['name']; ?>"><?php echo $category['name'] ?></a></li>
+						<li><a href="product.php?catg=<?php echo $category->getName(); ?>"><?php echo $category->getName() ?></a></li>
 					<?php endforeach; ?>
 				</ul>
 				<!-- /NAV -->
@@ -187,7 +176,7 @@ if (isset($_SESSION['client'])) {
 				<div class="col-md-6">
 					<div id="product-main-img">
 						<div class="product-preview">
-							<img src="<?php echo "admin/" . $product[0]['img']; ?>" alt="">
+							<img src="<?php echo "admin/" . $product->getImg(); ?>" alt="">
 						</div>
 					</div>
 				</div>
@@ -196,7 +185,7 @@ if (isset($_SESSION['client'])) {
 				<!-- Product details -->
 				<div class="col-md-6">
 					<div class="product-details">
-						<h2 class="product-name"><?php echo $product[0]['etiquette']; ?></h2>
+						<h2 class="product-name"><?php echo $product->getEtiquette(); ?></h2>
 						<div>
 							<div class="product-rating">
 								<i class="fa fa-star"></i>
@@ -207,10 +196,10 @@ if (isset($_SESSION['client'])) {
 							</div>
 						</div>
 						<div>
-							<h3 class="product-price"><?php echo $product[0]['prixOffre'] . "DH"; ?> <del class="product-old-price"><?php echo $product[0]['prixFinal'] . "DH"; ?></del></h3>
+							<h3 class="product-price"><?php echo $product->getPrixOffre() . "DH"; ?> <del class="product-old-price"><?php echo $product->getPrixFinal() . "DH"; ?></del></h3>
 							<span class="product-available">In Stock</span>
 						</div>
-						<p><?php echo $product[0]['descpt']; ?></p>
+						<p><?php echo $product->getDescpt(); ?></p>
 
 						<div class="add-to-cart">
 							
@@ -218,7 +207,7 @@ if (isset($_SESSION['client'])) {
 						</div>
 						<ul class="product-links">
 							<li>Category:</li>
-							<li><a href="#"><?php echo $product[0]['catg']; ?></a></li>
+							<li><a href="#"><?php echo $product->getCatg(); ?></a></li>
 						</ul>
 
 
@@ -242,7 +231,7 @@ if (isset($_SESSION['client'])) {
 							<div id="tab1" class="tab-pane fade in active">
 								<div class="row">
 									<div class="col-md-12">
-										<p><?php echo $product[0]['descpt']; ?></p>
+										<p><?php echo $product->getDescpt(); ?></p>
 									</div>
 								</div>
 							</div>
@@ -279,15 +268,15 @@ if (isset($_SESSION['client'])) {
 					<div class="col-md-3 col-xs-6">
 						<div class="product">
 							<div class="product-img">
-								<img src="<?php echo "admin/" . $item['img'] ?>" alt="">
+								<img src="<?php echo "admin/" . $item->getImg() ?>" alt="">
 								<div class="product-label">
 									<span class="sale">-30%</span>
 								</div>
 							</div>
 							<div class="product-body">
-								<p class="product-category"><?php echo $item['catg'] ?></p>
-								<h3 class="product-name"><a href="#"><?php echo $item['etiquette'] ?></a></h3>
-								<h4 class="product-price"><?php echo $item['prixOffre'] . "DH" ?> <del class="product-old-price"><?php echo $item['prixFinal'] . "DH" ?></del></h4>
+								<p class="product-category"><?php echo $item->getCatg() ?></p>
+								<h3 class="product-name"><a href="productPage.php?ref=<?= $item->getReference() ?>"><?php echo $item->getEtiquette() ?></a></h3>
+								<h4 class="product-price"><?php echo $item->getPrixOffre() . "DH" ?> <del class="product-old-price"><?php echo $item->getPrixFinal() . "DH" ?></del></h4>
 								<div class="product-rating">
 								</div>
 							</div>

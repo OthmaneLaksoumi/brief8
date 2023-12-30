@@ -15,7 +15,6 @@ if ($_SESSION['role'] == 1) {
                 $img = "assets/catgImages/" . $_FILES["img" . $i]['name'];
                 $categorie_to_add = new categories($name, $desc, $img, 0);
                 $DAOcategorie->insert_categorie($categorie_to_add);
-                // $data->insert_categorie($name, $desc, $img);
                 move_uploaded_file($_FILES["img" . $i]['tmp_name'], 'C:\xampp\htdocs\brief8\admin\assets\catgImages\\' . $_FILES["img" . $i]['name']);
             }
         }

@@ -1,13 +1,9 @@
 <?php
 session_start();
-// require_once(".//classes/DAOproduct.php");
 require_once("../classes/DAOcategories.php");
 
-// $DAOproduct = new DAOproduct();
-$DAOcategorie = new DAOcategorie();
 
-// require_once("allData.php");
-// $data = new data();
+$DAOcategorie = new DAOcategorie();
 
 if ($_SESSION["role"] == 1) {
     $catgs = array_merge($DAOcategorie->get_categorie(0), $DAOcategorie->get_categorie(1));

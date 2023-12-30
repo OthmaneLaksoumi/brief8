@@ -26,9 +26,30 @@ class DAOproduct
         return $products_objects;
     }
 
+    public function get_all_products()
+    {
+        return array_merge($this->get_product(0), $this->get_product(1));
+    }
+
+    public function get_product_by_reference($reference)
+    {
+        foreach ($this->get_all_products() as $product) {
+            if ($product->getReference() == $reference) {
+                return $product;
+            }
+        }
+    }
+
+    public function get_product_by_catg($categorie) {
+        $result = array();
+        foreach ($this->get_all_products() as $product) {
+            if($product->getCatg() == $categorie) $result[] = $product;  
+        }
+        return $result;
+    }
     public function insert_product($product)
     {
-        if (!in_array($product,array_merge($this->get_product(0), $this->get_product(1)))) {
+        if (!in_array($product, array_merge($this->get_product(0), $this->get_product(1)))) {
             $query = "INSERT INTO products
         (etiquette, descpt, codeBarres, img, prixAchat, prixFinal, prixOffre, qntMin, qntStock, catg)
         VALUES 
@@ -58,7 +79,8 @@ class DAOproduct
         $stmt->execute();
     }
 
-    public function hide_product($product, $isHide) {
+    public function hide_product($product, $isHide)
+    {
         $ref = $product->getReference();
         $query = "UPDATE products SET isHide = '$isHide' WHERE reference = '$ref'";
         $stmt = $this->db->prepare($query);
